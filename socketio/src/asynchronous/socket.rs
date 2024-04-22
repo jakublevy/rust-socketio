@@ -62,9 +62,7 @@ impl Socket {
     }
 
     pub async fn disconnect_no_msg(&self) -> Result<()> {
-        if self.is_engineio_connected() {
-            self.engine_client.disconnect_no_msg().await?;
-        }
+        self.engine_client.disconnect_no_msg().await?;
         if self.connected.load(Ordering::Acquire) {
             self.connected.store(false, Ordering::Release);
         }

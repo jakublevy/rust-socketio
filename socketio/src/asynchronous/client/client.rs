@@ -1,4 +1,5 @@
 use std::{ops::DerefMut, pin::Pin, sync::Arc};
+use std::ops::Deref;
 
 use backoff::{backoff::Backoff, ExponentialBackoffBuilder};
 use futures_util::{future::BoxFuture, stream, Stream, StreamExt};
@@ -22,7 +23,7 @@ use crate::{
     Event, Payload,
 };
 
-#[derive(Default)]
+#[derive(Default, PartialEq)]
 enum DisconnectReason {
     /// There is no known reason for the disconnect; likely a network error
     #[default]
@@ -108,6 +109,11 @@ impl Client {
     }
 
     pub(crate) async fn reconnect(&mut self) -> Result<()> {
+        let drr = self.disconnect_reason.read().await;
+        let dr = drr.deref();
+        if *dr == DisconnectReason::Manual {
+            return Ok(())
+        }
         let mut builder = self.builder.write().await;
 
         if let Some(config) = builder.on_reconnect.as_mut() {
