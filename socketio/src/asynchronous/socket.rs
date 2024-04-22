@@ -61,6 +61,16 @@ impl Socket {
         Ok(())
     }
 
+    pub async fn disconnect_no_msg(&self) -> Result<()> {
+        if self.is_engineio_connected() {
+            self.engine_client.disconnect_no_msg().await?;
+        }
+        if self.connected.load(Ordering::Acquire) {
+            self.connected.store(false, Ordering::Release);
+        }
+        Ok(())
+    }
+
     /// Sends a `socket.io` packet to the server using the `engine.io` client.
     pub async fn send(&self, packet: Packet) -> Result<()> {
         if !self.is_engineio_connected() || !self.connected.load(Ordering::Acquire) {

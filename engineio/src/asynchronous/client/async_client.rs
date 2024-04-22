@@ -43,6 +43,9 @@ impl Client {
     pub async fn disconnect(&self) -> Result<()> {
         self.socket.disconnect().await
     }
+    pub async fn disconnect_no_msg(&self) -> Result<()> {
+        self.socket.disconnect_no_msg().await
+    }
 
     /// Sends a packet to the server.
     pub async fn emit(&self, packet: Packet) -> Result<()> {

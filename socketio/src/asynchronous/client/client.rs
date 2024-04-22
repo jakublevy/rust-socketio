@@ -296,6 +296,13 @@ impl Client {
         Ok(())
     }
 
+    pub async fn disconnect_no_msg(&self) -> Result<()> {
+        *(self.disconnect_reason.write().await) = DisconnectReason::Manual;
+        self.socket.read().await.disconnect_no_msg().await?;
+
+        Ok(())
+    }
+
     /// Sends a message to the server but `alloc`s an `ack` to check whether the
     /// server responded in a given time span. This message takes an event, which
     /// could either be one of the common events like "message" or "error" or a

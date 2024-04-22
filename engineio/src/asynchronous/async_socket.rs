@@ -157,6 +157,15 @@ impl Socket {
         Ok(())
     }
 
+    pub async fn disconnect_no_msg(&self) -> Result<()> {
+        if let Some(on_close) = self.on_close.as_ref() {
+            let on_close = on_close.clone();
+            self.handle.spawn(async move { on_close(()).await });
+        }
+        self.connected.store(false, Ordering::Release);
+        Ok(())
+    }
+
     /// Sends a packet to the server.
     pub async fn emit(&self, packet: Packet) -> Result<()> {
         if !self.connected.load(Ordering::Acquire) {
